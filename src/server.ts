@@ -1,4 +1,5 @@
 import Hapi from '@hapi/hapi';
+import status from './plugins/status';
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,
@@ -6,8 +7,9 @@ const server: Hapi.Server = Hapi.server({
 });
 
 export const start = async (): Promise<Hapi.Server> => {
+  await server.register([status]);
   await server.start();
-  return server
+  return server;
 }
 
 process.on('unhandledRejection', err => {
