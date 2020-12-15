@@ -34,3 +34,31 @@ export const getUserHandler = async (request: Hapi.Request, h: Hapi.ResponseTool
     return Boom.badImplementation();
   }
 }
+
+export const deleteUserHandler = async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+  const { prisma } = request.server.app;
+  const userId = parseInt(request.params.userId, 10);
+  try {
+    await prisma.user.delete({ where: { id: userId } });
+    return h.response().code(204);
+  } catch (err) {
+    console.error(err);
+    return Boom.badImplementation();
+  }
+}
+
+export const updateUserHandler = async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+  const { prisma } = request.server.app;
+  const userId = parseInt(request.params.userId, 10);
+  const payload = request.payload as Partial<UserInput>
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: payload
+    })
+    return h.response(updatedUser).code(200);
+  } catch (err) {
+    console.error(err);
+    return Boom.badImplementation();
+  }
+}

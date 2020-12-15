@@ -1,6 +1,11 @@
 import Hapi from '@hapi/hapi';
-import { createUserHandler, getUserHandler } from '../controllers/users';
-import { userInputValidaor, getParams } from '../validators/users';
+import {
+  createUserHandler,
+  getUserHandler,
+  deleteUserHandler,
+  updateUserHandler
+} from '../controllers/users';
+import { userInputValidator, idParamValidator } from '../validators/users';
 
 const usersPlugin = {
   name: 'app/users',
@@ -11,13 +16,30 @@ const usersPlugin = {
         method: 'POST',
         path: '/users',
         handler: createUserHandler,
-        options: { validate: { payload: userInputValidaor } }
+        options: { validate: { payload: userInputValidator.tailor('post') } }
       },
       {
         method: 'GET',
         path: '/users/{userId}',
         handler: getUserHandler,
-        options: { validate: { params: getParams } }
+        options: { validate: { params: idParamValidator } }
+      },
+      {
+        method: 'DELETE',
+        path: '/users/{userId}',
+        handler: deleteUserHandler,
+        options: { validate: { params: idParamValidator } }
+      },
+      {
+        method: 'PUT',
+        path: '/users/{userId}',
+        handler: updateUserHandler,
+        options: {
+          validate: {
+            params: idParamValidator,
+            payload: userInputValidator.tailor('put')
+          }
+        }
       }
     ]);
   }

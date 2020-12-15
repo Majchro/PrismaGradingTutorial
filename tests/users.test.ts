@@ -61,5 +61,50 @@ describe('GET /users/{userId}', () => {
     expect(response.statusCode).toEqual(200);
     const user = JSON.parse(response.payload);
     expect(user.id).toBe(userId);
-  })
-})
+  });
+});
+
+describe('PUT /users/{userId}', () => {
+  test('return 400 for invalid ID', async () => {
+    const response = await server.inject({
+      method: 'PUT',
+      url: '/users/9999error'
+    });
+    expect(response.statusCode).toEqual(400);
+  });
+
+  test('update user', async () => {
+    const updatedValue: String = 'UpdatedTest';
+
+    const response = await server.inject({
+      method: 'PUT',
+      url: `/users/${userId}`,
+      payload: {
+        firstName: updatedValue,
+        lastName: updatedValue
+      }
+    });
+    expect(response.statusCode).toEqual(200);
+    const user = JSON.parse(response.payload);
+    expect(user.firstName).toEqual(updatedValue);
+    expect(user.lastName).toEqual(updatedValue);
+  });
+});
+
+describe('DELETE /users/{userId}', () => {
+  test('return 400 for invalid ID', async () => {
+    const response = await server.inject({
+      method: 'DELETE',
+      url: '/users/9999error'
+    });
+    expect(response.statusCode).toEqual(400);
+  });
+
+  test('delete user', async () => {
+    const response = await server.inject({
+      method: 'DELETE',
+      url: `/users/${userId}`
+    });
+    expect(response.statusCode).toEqual(204);
+  });
+});

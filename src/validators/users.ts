@@ -1,9 +1,18 @@
 import Joi from 'joi';
 
-export const userInputValidaor = Joi.object({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  email: Joi.string().email().required(),
+export const userInputValidator = Joi.object({
+  firstName: Joi.string().alter({
+    post: schema => schema.required(),
+    put: schema => schema.optional()
+  }),
+  lastName: Joi.string().alter({
+    post: schema => schema.required(),
+    put: schema => schema.optional()
+  }),
+  email: Joi.string().email().alter({
+    post: schema => schema.required(),
+    put: schema => schema.optional()
+  }),
   social: Joi.object({
     facebook: Joi.string().optional(),
     twitter: Joi.string().optional(),
@@ -12,6 +21,6 @@ export const userInputValidaor = Joi.object({
   }).optional()
 });
 
-export const getParams = Joi.object({
+export const idParamValidator = Joi.object({
   userId: Joi.number().integer()
 });
