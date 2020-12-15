@@ -11,3 +11,7 @@ export const userInputValidaor = Joi.object({
     website: Joi.string().optional()
   }).optional()
 });
+
+export const getParams = Joi.object({
+  userId: Joi.number().integer()
+});

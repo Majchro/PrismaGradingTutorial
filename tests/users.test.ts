@@ -1,14 +1,13 @@
 import { createServer } from '../src/server';
 import Hapi from '@hapi/hapi';
 
+let userId: number;
+let server: Hapi.Server;
+
+beforeAll(async () => server = await createServer());
+afterAll(async () => await server.stop());
+
 describe('POST /users', () => {
-  let server: Hapi.Server;
-
-  beforeAll(async () => server = await createServer());
-  afterAll(async () => await server.stop());
-
-  let userId: number;
-
   test('create user', async () => {
     const response = await server.inject({
       method: 'POST',
@@ -44,3 +43,23 @@ describe('POST /users', () => {
     expect(response.statusCode).toEqual(400);
   });
 });
+
+describe('GET /users/{userId}', () => {
+  test('return 404 for non existance user', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/users/9999'
+    });
+    expect(response.statusCode).toEqual(404);
+  });
+
+  test('return user', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: `/users/${userId}`
+    });
+    expect(response.statusCode).toEqual(200);
+    const user = JSON.parse(response.payload);
+    expect(user.id).toBe(userId);
+  })
+})

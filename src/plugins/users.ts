@@ -1,6 +1,6 @@
 import Hapi from '@hapi/hapi';
-import { createUserHandler } from '../controllers/users';
-import { userInputValidaor } from '../validators/users';
+import { createUserHandler, getUserHandler } from '../controllers/users';
+import { userInputValidaor, getParams } from '../validators/users';
 
 const usersPlugin = {
   name: 'app/users',
@@ -12,6 +12,12 @@ const usersPlugin = {
         path: '/users',
         handler: createUserHandler,
         options: { validate: { payload: userInputValidaor } }
+      },
+      {
+        method: 'GET',
+        path: '/users/{userId}',
+        handler: getUserHandler,
+        options: { validate: { params: getParams } }
       }
     ]);
   }
