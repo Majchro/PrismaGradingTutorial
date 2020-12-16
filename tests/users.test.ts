@@ -64,6 +64,18 @@ describe('GET /users/{userId}', () => {
   });
 });
 
+describe('GET /users', () => {
+  test('return all users', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/users'
+    });
+    expect(response.statusCode).toEqual(200);
+    const users = JSON.parse(response.payload);
+    expect(Array.isArray(users)).toBeTruthy();
+  });
+});
+
 describe('PUT /users/{userId}', () => {
   test('return 400 for invalid ID', async () => {
     const response = await server.inject({

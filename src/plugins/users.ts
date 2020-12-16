@@ -3,7 +3,8 @@ import {
   createUserHandler,
   getUserHandler,
   deleteUserHandler,
-  updateUserHandler
+  updateUserHandler,
+  getAllUsersHandler
 } from '../controllers/users';
 import { userInputValidator, idParamValidator } from '../validators/users';
 
@@ -40,6 +41,11 @@ const usersPlugin = {
             payload: userInputValidator.tailor('put')
           }
         }
+      },
+      {
+        method: 'GET',
+        path: '/users',
+        handler: getAllUsersHandler
       }
     ]);
   }

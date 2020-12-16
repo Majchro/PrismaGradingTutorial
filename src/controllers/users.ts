@@ -62,3 +62,15 @@ export const updateUserHandler = async (request: Hapi.Request, h: Hapi.ResponseT
     return Boom.badImplementation();
   }
 }
+
+export const getAllUsersHandler = async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+  const { prisma } = request.server.app;
+  try {
+    const users = await prisma.user.findMany();
+    if (!users) return h.response().code(404);
+    return h.response(users).code(200);
+  } catch (err) {
+    console.error(err);
+    return Boom.badImplementation();
+  }
+}
