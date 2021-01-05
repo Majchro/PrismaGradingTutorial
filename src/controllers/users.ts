@@ -15,7 +15,7 @@ export const createUserHandler = async (request: Hapi.Request, h: Hapi.ResponseT
       },
       select: { id: true }
     });
-    return h.response(createdUser).code(201)
+    return h.response(createdUser).code(201);
   } catch (err) {
     console.error(err);
     return Boom.badImplementation();

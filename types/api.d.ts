@@ -9,3 +9,8 @@ export interface UserInput {
     website?: string
   }
 }
+
+export interface CourseInput {
+  name: string
+  courseDetails?: string
+}
