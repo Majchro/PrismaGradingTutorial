@@ -3,6 +3,7 @@ import status from './plugins/status';
 import prisma from './plugins/prisma';
 import users from './plugins/users';
 import courses from './plugins/courses';
+import tests from './plugins/tests';
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,
@@ -10,7 +11,7 @@ const server: Hapi.Server = Hapi.server({
 });
 
 export const createServer = async (): Promise<Hapi.Server> => {
-  await server.register([status, prisma, users, courses]);
+  await server.register([status, prisma, users, courses, tests]);
   await server.initialize();
   return server;
 }

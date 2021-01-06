@@ -14,3 +14,8 @@ export interface CourseInput {
   name: string
   courseDetails?: string
 }
+
+export interface TestInput {
+  name: string
+  date: Date
+}
