@@ -1,5 +1,5 @@
 import { createServer } from '../src/server';
-import Hapi from '@hapi/hapi';
+import * as Hapi from '@hapi/hapi';
 
 let courseId: number;
 let server: Hapi.Server;
@@ -18,7 +18,8 @@ describe('POST /courses', () => {
       }
     });
     expect(response.statusCode).toEqual(201);
-    courseId = JSON.parse(response.payload)?.id;
+    const jsonResponse = JSON.parse(response.payload);
+    courseId = jsonResponse ? jsonResponse.id : null;
     expect(typeof courseId === 'number').toBeTruthy();
   });
 

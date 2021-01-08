@@ -1,15 +1,22 @@
 import { createServer } from '../src/server';
-import Hapi from '@hapi/hapi';
+import * as Hapi from '@hapi/hapi';
+import { createCourseId, removeCourse } from './helpers';
 
 let testId: number;
+let courseId: number;
 let server: Hapi.Server;
 
-beforeAll(async () => server = await createServer());
-afterAll(async () => await server.stop());
+beforeAll(async () => {
+  server = await createServer();
+  courseId = await createCourseId(server);
+});
+afterAll(async () => {
+  removeCourse(server, courseId);
+  await server.stop();
+});
 
 describe('POST /courses/{courseId}/tests', () => {
   test('create test', async () => {
-    const courseId = await createCourseId();
     const response = await server.inject({
       method: 'POST',
       url: `/courses/${courseId}/tests`,
@@ -19,7 +26,8 @@ describe('POST /courses/{courseId}/tests', () => {
       }
     });
     expect(response.statusCode).toEqual(201);
-    testId = JSON.parse(response.payload)?.id;
+    const jsonResponse = JSON.parse(response.payload);
+    testId = jsonResponse ? jsonResponse.id : null;
     expect(typeof testId === 'number').toBeTruthy();
   });
 
@@ -95,15 +103,3 @@ describe('DELETE /courses/tests/{testId}', () => {
     expect(response.statusCode).toEqual(204);
   });
 });
-
-const createCourseId = async () => {
-  const response = await server.inject({
-    method: 'POST',
-    url: '/courses',
-    payload: {
-      name: 'Test name',
-      courseDetails: 'Test description'
-    }
-  });
-  return JSON.parse(response.payload)?.id;
-}

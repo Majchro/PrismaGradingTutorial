@@ -1,5 +1,5 @@
 import { createServer } from '../src/server';
-import Hapi from '@hapi/hapi';
+import * as Hapi from '@hapi/hapi';
 
 let userId: number;
 let server: Hapi.Server;
@@ -23,7 +23,8 @@ describe('POST /users', () => {
       }
     });
     expect(response.statusCode).toEqual(201);
-    userId = JSON.parse(response.payload)?.id;
+    const jsonResponse = JSON.parse(response.payload);
+    userId = jsonResponse ? jsonResponse.id : null;
     expect(typeof userId === 'number').toBeTruthy();
   });
 
