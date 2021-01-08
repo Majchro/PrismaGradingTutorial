@@ -11,7 +11,7 @@ beforeAll(async () => {
   courseId = await createCourseId(server);
 });
 afterAll(async () => {
-  removeCourse(server, courseId);
+  await removeCourse(server, courseId);
   await server.stop();
 });
 

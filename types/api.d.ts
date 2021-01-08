@@ -1,3 +1,5 @@
+import { UserRole } from '@prisma/client';
+
 export interface UserInput {
   firstName: string
   lastName: string
@@ -18,4 +20,9 @@ export interface CourseInput {
 export interface TestInput {
   name: string
   date: Date
+}
+
+export interface UserEnrollmentInput {
+  courseId: number
+  role: UserRole
 }
