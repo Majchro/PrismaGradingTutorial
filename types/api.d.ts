@@ -26,3 +26,9 @@ export interface UserEnrollmentInput {
   courseId: number
   role: UserRole
 }
+
+export interface TestResultInput {
+  result: number
+  studentId: number
+  graderId: number
+}
