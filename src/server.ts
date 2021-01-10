@@ -6,6 +6,7 @@ import courses from './plugins/courses';
 import tests from './plugins/tests';
 import usersEnrollment from './plugins/users-enrollment';
 import testResults from './plugins/test-results';
+import email from './plugins/email';
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,
@@ -20,7 +21,8 @@ export const createServer = async (): Promise<Hapi.Server> => {
     courses,
     tests,
     usersEnrollment,
-    testResults
+    testResults,
+    email
   ]);
   await server.initialize();
   return server;
