@@ -8,8 +8,8 @@ export const createUserHandler = async (request: Hapi.Request, h: Hapi.ResponseT
   try {
     const createdUser = await prisma.user.create({
       data: {
-        firstName: payload.firstName,
-        lastName: payload.lastName,
+        firstName: payload.firstName || '',
+        lastName: payload.lastName || '',
         email: payload.email,
         social: JSON.stringify(payload.social)
       },

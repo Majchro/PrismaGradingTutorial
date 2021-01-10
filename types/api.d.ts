@@ -1,8 +1,8 @@
 import { UserRole } from '@prisma/client';
 
 export interface UserInput {
-  firstName: string
-  lastName: string
+  firstName?: string
+  lastName?: string
   email: string
   social: {
     facebook?: string

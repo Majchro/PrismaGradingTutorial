@@ -1,14 +1,8 @@
 import Joi from 'joi';
 
 export const userInputValidator = Joi.object({
-  firstName: Joi.string().alter({
-    post: schema => schema.required(),
-    put: schema => schema.optional()
-  }),
-  lastName: Joi.string().alter({
-    post: schema => schema.required(),
-    put: schema => schema.optional()
-  }),
+  firstName: Joi.string().optional(),
+  lastName: Joi.string().optional(),
   email: Joi.string().email().alter({
     post: schema => schema.required(),
     put: schema => schema.optional()
