@@ -32,3 +32,7 @@ export interface TestResultInput {
   studentId: number
   graderId: number
 }
+
+export interface LoginInput {
+  email: string
+}

@@ -1,4 +1,5 @@
 import Hapi from '@hapi/hapi';
+import hapiAuthJWT from 'hapi-auth-jwt2';
 import status from './plugins/status';
 import prisma from './plugins/prisma';
 import users from './plugins/users';
@@ -7,6 +8,7 @@ import tests from './plugins/tests';
 import usersEnrollment from './plugins/users-enrollment';
 import testResults from './plugins/test-results';
 import email from './plugins/email';
+import auth from './plugins/auth';
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,
@@ -22,7 +24,9 @@ export const createServer = async (): Promise<Hapi.Server> => {
     tests,
     usersEnrollment,
     testResults,
-    email
+    email,
+    hapiAuthJWT,
+    auth
   ]);
   await server.initialize();
   return server;
