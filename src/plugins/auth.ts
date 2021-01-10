@@ -1,7 +1,7 @@
 import Hapi from '@hapi/hapi';
 // import { TokenType, UserRole } from '@prisma/client';
-import { loginHandler } from '../controllers/auth';
-import { loginValidator } from '../validators/auth';
+import { loginHandler, authenticateHandler } from '../controllers/auth';
+import { loginValidator, authenticateValidator } from '../validators/auth';
 
 const authPlugin: Hapi.Plugin<null> = {
   name: 'app/auth',
@@ -16,8 +16,19 @@ const authPlugin: Hapi.Plugin<null> = {
           auth: false,
           validate: { payload: loginValidator }
         }
+      },
+      {
+        method: 'POST',
+        path: '/authenticate',
+        handler: authenticateHandler,
+        options: {
+          auth: false,
+          validate: {
+            payload: authenticateValidator
+          }
+        }
       }
-    ])
+    ]);
   }
 }
 

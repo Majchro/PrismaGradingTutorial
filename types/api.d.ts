@@ -36,3 +36,8 @@ export interface TestResultInput {
 export interface LoginInput {
   email: string
 }
+
+export interface AuthenticateInput {
+  email: string
+  emailToken: string
+}
