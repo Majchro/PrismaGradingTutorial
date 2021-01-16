@@ -1,6 +1,13 @@
 import Hapi from '@hapi/hapi';
 // import { TokenType, UserRole } from '@prisma/client';
-import { loginHandler, authenticateHandler } from '../controllers/auth';
+import {
+  loginHandler,
+  authenticateHandler,
+  validateAPIToken,
+  JWT_SECRET,
+  JWT_ALGORITHM,
+  API_AUTH_STRATEGY
+} from '../controllers/auth';
 import { loginValidator, authenticateValidator } from '../validators/auth';
 
 const authPlugin: Hapi.Plugin<null> = {
@@ -29,6 +36,14 @@ const authPlugin: Hapi.Plugin<null> = {
         }
       }
     ]);
+
+    server.auth.strategy(API_AUTH_STRATEGY, 'jwt', {
+      key: JWT_SECRET,
+      verifyOptions: { algorithms: [JWT_ALGORITHM] },
+      validate: validateAPIToken
+    });
+
+    server.auth.default(API_AUTH_STRATEGY)
   }
 }
 

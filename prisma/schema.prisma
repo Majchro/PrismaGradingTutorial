@@ -13,6 +13,7 @@ model User {
   firstName String?
   lastName String?
   social Json?
+  isAdmin Boolean @default(false)
 
   courses CourseEnrollment[]
   testResults TestResult[] @relation(name: "results")

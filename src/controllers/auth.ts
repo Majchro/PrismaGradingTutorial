@@ -3,13 +3,17 @@ import Boom from '@hapi/boom';
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
-import { TokenType } from '@prisma/client';
+import { TokenType, UserRole } from '@prisma/client';
 import { LoginInput, AuthenticateInput } from '../../types/api';
+import { apiTokenSchema } from '../validators/auth';
 
 const EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
-const JWT_SECRET = process.env.JWT_SECRET || 'SUPER_SECRET_KEY';
-const JWT_ALGORITHM = 'HS256';
 const AUTHENTICATION_TOKEN_EXPIRATION_HOURS = 12;
+export const JWT_SECRET = process.env.JWT_SECRET || 'SUPER_SECRET_KEY';
+export const JWT_ALGORITHM = 'HS256';
+export const API_AUTH_STRATEGY = 'API';
+
+interface APITokenPayload { tokenId: number }
 
 export const loginHandler = async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
   const { prisma, sendEmailToken } = request.server.app;
@@ -68,6 +72,49 @@ export const authenticateHandler = async (request: Hapi.Request, h: Hapi.Respons
     return h.response().code(200).header('Authorization', authToken);
   } catch (err) {
     return Boom.badImplementation(err.message);
+  }
+}
+
+export const validateAPIToken = async (decoded: APITokenPayload, request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+  const { prisma } = request.server.app;
+  const { tokenId } = decoded;
+  const { error } = apiTokenSchema.validate(decoded);
+
+  if (error) {
+    request.log(['error', 'auth'], `API token error: ${error.message}`);
+    return { isValid: false }
+  }
+
+  try {
+    const fetchedToken = await prisma.token.findUnique({
+      where: { id: tokenId },
+      include: { user: true }
+    });
+
+    if (!fetchedToken || !fetchedToken?.valid) {
+      return { isValid: false, errorMessage: 'Invalid token' };
+    }
+
+    if (fetchedToken.expiration < new Date()) {
+      return { isValid: false, errorMessage: 'Token expired' };
+    }
+
+    const teacherOf = await prisma.courseEnrollment.findMany({
+      where: { userId: fetchedToken.userId, role: UserRole.TEACHER },
+      select: { courseId: true }
+    });
+    return {
+      isValid: true,
+      credentials: {
+        tokenId: decoded.tokenId,
+        userId: fetchedToken.userId,
+        isAdmin: fetchedToken.user.isAdmin,
+        teacherOf: teacherOf.map(({ courseId }) => courseId)
+      }
+    }
+  } catch (err) {
+    request.log(['error', 'auth', 'db'], error);
+    return { isValid: false };
   }
 }
 
