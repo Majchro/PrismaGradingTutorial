@@ -12,6 +12,12 @@ import {
   userIdParamValidator,
   testResultIdParamValidator
 } from '../validators/test-results';
+import {
+  isRequestedUserOrAdmin,
+  isTeacherOfTestOrAdmin,
+  isGraderOfTestResultOrAdmin
+} from '../services/abilities';
+import { API_AUTH_STRATEGY } from '../controllers/auth';
 
 const testResultsPlugin = {
   name: 'app/testResults',
@@ -26,26 +32,40 @@ const testResultsPlugin = {
           validate: {
             params: testIdParamValidator,
             payload: testResultInputValidator.tailor('post')
-          }
+          },
+          pre: [isTeacherOfTestOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
         }
       },
       {
         method: 'GET',
         path: '/courses/tests/{testId}/test-results',
         handler: getTestResultsHandler,
-        options: { validate: { params: testIdParamValidator } }
+        options: {
+          validate: { params: testIdParamValidator },
+          pre: [isTeacherOfTestOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
+        }
       },
       {
         method: 'GET',
         path: '/users/{userId}/test-results',
         handler: getUserTestResultsHandler,
-        options: { validate: { params: userIdParamValidator } }
+        options: {
+          validate: { params: userIdParamValidator },
+          pre: [isRequestedUserOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
+        }
       },
       {
         method: 'DELETE',
         path: '/courses/tests/test-results/{testResultId}',
         handler: deleteTestResultHandler,
-        options: { validate: { params: testResultIdParamValidator } }
+        options: {
+          validate: { params: testResultIdParamValidator },
+          pre: [isGraderOfTestResultOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
+        }
       },
       {
         method: 'PUT',
@@ -55,7 +75,9 @@ const testResultsPlugin = {
           validate: {
             params: testResultIdParamValidator,
             payload: testResultInputValidator.tailor('put')
-          }
+          },
+          pre: [isGraderOfTestResultOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
         }
       }
     ]);

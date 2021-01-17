@@ -9,6 +9,8 @@ import {
   userIdParamValidator,
   userCourseIdsParamValidator
 } from '../validators/users-enrollment';
+import { isRequestedUserOrAdmin } from '../services/abilities';
+import { API_AUTH_STRATEGY } from '../controllers/auth';
 
 const usersEnrollmentPlugin = {
   name: 'app/usersEnrollment',
@@ -23,20 +25,30 @@ const usersEnrollmentPlugin = {
           validate: {
             params: userIdParamValidator,
             payload: userInputValidator
-          }
+          },
+          pre: [isRequestedUserOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
         }
       },
       {
         method: 'GET',
         path: '/users/{userId}/courses',
         handler: getUserEnrollmentHandler,
-        options: { validate: { params: userIdParamValidator } }
+        options: {
+          validate: { params: userIdParamValidator },
+          pre: [isRequestedUserOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
+        }
       },
       {
         method: 'DELETE',
         path: '/users/{userId}/courses/{courseId}',
         handler: deleteUserEnrollmentHandler,
-        options: { validate: { params: userCourseIdsParamValidator } }
+        options: {
+          validate: { params: userCourseIdsParamValidator },
+          pre: [isRequestedUserOrAdmin],
+          auth: { mode: 'required', strategy: API_AUTH_STRATEGY }
+        }
       }
     ]);
   }

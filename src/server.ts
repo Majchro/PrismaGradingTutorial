@@ -19,14 +19,14 @@ export const createServer = async (): Promise<Hapi.Server> => {
   await server.register([
     status,
     prisma,
+    hapiAuthJWT,
+    auth,
+    email,
     users,
     courses,
     tests,
     usersEnrollment,
-    testResults,
-    email,
-    hapiAuthJWT,
-    auth
+    testResults
   ]);
   await server.initialize();
   return server;

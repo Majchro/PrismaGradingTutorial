@@ -6,7 +6,8 @@ const plugin: Hapi.Plugin<undefined> = {
     server.route({
       method: 'GET',
       path: '/',
-      handler: (_, h: Hapi.ResponseToolkit) => h.response({ up: true }).code(200)
+      handler: (_, h: Hapi.ResponseToolkit) => h.response({ up: true }).code(200),
+      options: { auth: false }
     });
   }
 }
