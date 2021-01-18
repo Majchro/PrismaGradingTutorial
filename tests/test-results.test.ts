@@ -1,14 +1,16 @@
 import { createServer } from '../src/server';
 import * as Hapi from '@hapi/hapi';
+import { API_AUTH_STRATEGY } from '../src/controllers/auth';
 import {
-  createCourseId,
-  createTestId,
+  createCourse,
+  createTest,
   removeCourse,
   removeTest,
-  createUserId,
+  createUser,
   removeUser,
   createUserEnrollment,
-  removeUserEnrollment
+  removeUserEnrollment,
+  getUserCredentials
 } from './helpers';
 
 let testId: number;
@@ -16,16 +18,20 @@ let courseId: number;
 let studentId: number;
 let teacherId: number;
 let testResultId: number;
+let adminUserCredentials: Hapi.AuthCredentials;
 let server: Hapi.Server;
 
 beforeAll(async () => {
   server = await createServer();
-  courseId = await createCourseId(server);
-  testId = await createTestId(server, courseId);
-  studentId = await createUserId(server, 'student@student.pl');
-  teacherId = await createUserId(server, 'teacher@teacher.pl');
+  await createCourse(server).then(course => courseId = course.id);
+  await createTest(server, courseId).then(test => testId = test.id);
+  console.log('moze sie pokaze hehe')
+  await createUser(server, false).then(user => studentId = user.id);
+  await createUser(server, false).then(user => teacherId = user.id);
   await createUserEnrollment(server, studentId, courseId, 'STUDENT');
   await createUserEnrollment(server, teacherId, courseId, 'TEACHER');
+  const adminUser = await createUser(server, true);
+  adminUserCredentials = getUserCredentials(adminUser);
 });
 afterAll(async () => {
   await removeUserEnrollment(server, studentId, courseId)
@@ -46,6 +52,10 @@ describe('POST /courses/tests/{testId}/test-results', () => {
         result: 950,
         studentId,
         graderId: teacherId
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(201);
@@ -60,6 +70,10 @@ describe('POST /courses/tests/{testId}/test-results', () => {
       url: `/courses/tests/${testId}/test-results`,
       payload: {
         result: 1001
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(400);
@@ -70,7 +84,11 @@ describe('GET /courses/tests/{testId}/test-results', () => {
   test('return test results for a specific test', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: `/courses/tests/${testId}/test-results`
+      url: `/courses/tests/${testId}/test-results`,
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(200);
     const jsonResponse = JSON.parse(response.payload);
@@ -83,7 +101,11 @@ describe('GET /users/{userId}/test-results', () => {
   test('return test results for a specific user', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: `/users/${studentId}/test-results`
+      url: `/users/${studentId}/test-results`,
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(200);
     const jsonResponse = JSON.parse(response.payload);
@@ -96,7 +118,11 @@ describe('PUT /courses/tests/test-results/{testResultId}', () => {
   test('return 400 for invalid ID', async () => {
     const response = await server.inject({
       method: 'PUT',
-      url: '/courses/tests/test-results/9999'
+      url: '/courses/tests/test-results/9999',
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(400);
   });
@@ -107,6 +133,10 @@ describe('PUT /courses/tests/test-results/{testResultId}', () => {
       url: `/courses/tests/test-results/${testResultId}`,
       payload: {
         result: 1000
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(200);
@@ -119,7 +149,11 @@ describe('DELETE /courses/tests/test-results/{testResultId}', () => {
   test('return 400 for invalid ID', async () => {
     const response = await server.inject({
       method: 'DELETE',
-      url: '/courses/tests/test-results/9999error'
+      url: '/courses/tests/test-results/9999error',
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(400);
   });
@@ -127,7 +161,11 @@ describe('DELETE /courses/tests/test-results/{testResultId}', () => {
   test('delete test result', async () => {
     const response = await server.inject({
       method: 'DELETE',
-      url: `/courses/tests/test-results/${testResultId}`
+      url: `/courses/tests/test-results/${testResultId}`,
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(204);
   });

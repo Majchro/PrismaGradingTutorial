@@ -1,11 +1,25 @@
-import { createServer } from '../src/server';
 import * as Hapi from '@hapi/hapi';
+import { createServer } from '../src/server';
+import { API_AUTH_STRATEGY } from '../src/controllers/auth';
+import {
+  createUser,
+  getUserCredentials,
+  removeUser
+} from './helpers';
 
+let adminUserCredentials: Hapi.AuthCredentials;
 let userId: number;
 let server: Hapi.Server;
 
-beforeAll(async () => server = await createServer());
-afterAll(async () => await server.stop());
+beforeAll(async () => {
+  server = await createServer()
+  const adminUser = await createUser(server, true);
+  adminUserCredentials = getUserCredentials(adminUser);
+});
+afterAll(async () => {
+  await removeUser(server, adminUserCredentials.userId)
+  await server.stop();
+});
 
 describe('POST /users', () => {
   test('create user', async () => {
@@ -15,11 +29,11 @@ describe('POST /users', () => {
       payload: {
         firstName: 'Test',
         lastName: 'Test',
-        email: 'test@test.pl',
-        social: {
-          twitter: 'test-twitter',
-          website: 'test.pl'
-        }
+        email: 'test@test.pl'
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(201);
@@ -34,11 +48,14 @@ describe('POST /users', () => {
       url: '/users',
       payload: {
         lastName: 'Test',
-        email: 'test@test.pl',
         social: {
           twitter: 'test-twitter',
           website: 'test.pl'
         }
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(400);
@@ -49,7 +66,11 @@ describe('GET /users/{userId}', () => {
   test('return 404 for non existance user', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/users/9999'
+      url: '/users/9999',
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(404);
   });
@@ -57,7 +78,11 @@ describe('GET /users/{userId}', () => {
   test('return user', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: `/users/${userId}`
+      url: `/users/${userId}`,
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(200);
     const user = JSON.parse(response.payload);
@@ -69,7 +94,11 @@ describe('GET /users', () => {
   test('return all users', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/users'
+      url: '/users',
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(200);
     const users = JSON.parse(response.payload);
@@ -81,7 +110,11 @@ describe('PUT /users/{userId}', () => {
   test('return 400 for invalid ID', async () => {
     const response = await server.inject({
       method: 'PUT',
-      url: '/users/9999error'
+      url: '/users/9999error',
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(400);
   });
@@ -95,6 +128,10 @@ describe('PUT /users/{userId}', () => {
       payload: {
         firstName: updatedValue,
         lastName: updatedValue
+      },
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
       }
     });
     expect(response.statusCode).toEqual(200);
@@ -105,18 +142,14 @@ describe('PUT /users/{userId}', () => {
 });
 
 describe('DELETE /users/{userId}', () => {
-  test('return 400 for invalid ID', async () => {
-    const response = await server.inject({
-      method: 'DELETE',
-      url: '/users/9999error'
-    });
-    expect(response.statusCode).toEqual(400);
-  });
-
   test('delete user', async () => {
     const response = await server.inject({
       method: 'DELETE',
-      url: `/users/${userId}`
+      url: `/users/${userId}`,
+      auth: {
+        strategy: API_AUTH_STRATEGY,
+        credentials: adminUserCredentials
+      }
     });
     expect(response.statusCode).toEqual(204);
   });
